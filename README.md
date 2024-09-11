@@ -1,19 +1,32 @@
-# Apollonion Conversation Service
+# Nuance Retrieval Service 
 
-DONE - set the stage for channels:
-	store identifiers and broadcast messages to all clients
-	the client that sends the message should not receive it back
-	test coverage
-	should open up the door for using channels and then we can
-	bring back in a good implementation of fanout orchestration
+## Overview 
 
-NEED TO START - controlling concurrency:
-	cap goroutines, but still accept more clients to connect
-	maybe store a slice of net.Conn to sorta cache them so we can get
-	around to them later while staying under the goroutine cap
-	test coverage
-failure case coverage for existing and new logic:
+The Nuance Retrieval Service is exposes a RAG application over a tcp server
 
+# EKS
+
+The scripts will create resources in: us-east-1
+
+# How to run it
+- export AWS_PROFILE=user1 # The name of the profile you want to use
+- ./create-vpc-stack.sh
+- ./create-eks-stack.sh
+
+# How to clean up
+- ./delete-eks-stack.sh
+- ./delete-vpc-stack.sh
+
+# Tips
+
+## Update Kubeconfig
+aws eks update-kubeconfig --region us-east-1 --name my-eks-cluster
+
+## Install an ingress controller
+https://kubernetes.github.io/ingress-nginx/deploy/#quick-start
+
+## Verify ingress controller
+kubectl get service ingress-nginx-controller --namespace=ingress-nginx
 
 [05/01/2024 notes]
 
@@ -99,3 +112,36 @@ also put interfaces by their consumers as opposed to the structs their resemblin
 * broadcast a message sent to all other chatters in the server
 
 [05/31/2024]
+
+
+[07/17/2024]
+
+implemente horizontal skaling w/ k8s(2 or more)
+
+get client to connect to one of the servers and then the responding server broadcasts to all clients
+
+put a load balancing application in front of the two servers
+
+eventing service for handling the messages 
+
+can speed up implementation by leveraging k8s from docker desktop 
+
+test coverage as well 
+
+NewServer() should start the listener and can then return itself plus the error so you can still check the error in main
+
+pass the config to new server as well so you can parameterize port of service
+
+we should have a distinct client package
+
+have a start function(will be your handle client thing) and then call that with a goroutine in main, and then the start function will have your main for loop in it
+
+go s.HandleClient(conn) should be in Start or Begin function
+
+simplify server
+
+implement concurrent broadcast to clients, needs to handle for arbitray scaling 
+
+fence off open API stuff
+
+proper commenting, documentation, and testing 
